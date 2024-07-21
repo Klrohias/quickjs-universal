@@ -108,7 +108,7 @@ typedef struct timeval {
 } timeval;
 #endif
 
-int gettimeofday(struct timeval* tp, struct timezone* tzp)
+int __inline gettimeofday(struct timeval* tp, struct timezone* tzp)
 {
     static const uint64_t EPOCH = ((uint64_t)116444736000000000ULL);
 
