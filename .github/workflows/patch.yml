@@ -13,10 +13,16 @@ jobs:
       uses: actions/checkout@v4
       with:
         path: quickjs-universal
+
     - name: Patch
+      id: patch
       run: |
         pushd quickjs-universal
         pwsh ./Patch.ps1
+        pushd OriginalSources/
+        commitHash=$(git rev-parse --short HEAD)
+        popd
+        echo "commitHash=$commitHash" >> "$GITHUB_OUTPUT"
         popd
         
     - name: Create Pull Request
@@ -24,3 +30,4 @@ jobs:
       with:
         path: quickjs-universal
         add-paths: PatchedSources/
+        branch: ${{ format('patch/{0}', steps.patch.outputs.commitHash) }}
