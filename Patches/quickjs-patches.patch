@@ -286,10 +286,35 @@ index 3cb2643..b881166 100644
      return cmp;
  }
 diff --git a/OriginalSources/quickjs.h b/PatchedSources/quickjs.h
-index edc7b47..6c80bf9 100644
+index edc7b47..b580224 100644
 --- a/OriginalSources/quickjs.h
 +++ b/PatchedSources/quickjs.h
-@@ -672,7 +672,7 @@ static inline JSValue JS_DupValue(JSContext *ctx, JSValueConst v)
+@@ -215,8 +215,22 @@ typedef struct JSValue {
+ #define JS_VALUE_GET_FLOAT64(v) ((v).u.float64)
+ #define JS_VALUE_GET_PTR(v) ((v).u.ptr)
+ 
+-#define JS_MKVAL(tag, val) (JSValue){ (JSValueUnion){ .int32 = val }, tag }
+-#define JS_MKPTR(tag, p) (JSValue){ (JSValueUnion){ .ptr = p }, tag }
++inline JSValue _patch_JS_MKVAL(int64_t tag, int32_t val) {
++    JSValue value;
++    value.u.int32 = val;
++    value.tag = tag;
++    return value;
++}
++
++inline JSValue _patch_JS_MKPTR(int64_t tag, void* val) {
++    JSValue value;
++    value.u.ptr = val;
++    value.tag = tag;
++    return value;
++}
++
++#define JS_MKVAL(tag, val) (_patch_JS_MKVAL(tag, val))
++#define JS_MKPTR(tag, p) (_patch_JS_MKPTR(tag, p))
+ 
+ #define JS_TAG_IS_FLOAT64(tag) ((unsigned)(tag) == JS_TAG_FLOAT64)
+ 
+@@ -672,7 +686,7 @@ static inline JSValue JS_DupValue(JSContext *ctx, JSValueConst v)
          JSRefCountHeader *p = (JSRefCountHeader *)JS_VALUE_GET_PTR(v);
          p->ref_count++;
      }
@@ -298,7 +323,7 @@ index edc7b47..6c80bf9 100644
  }
  
  static inline JSValue JS_DupValueRT(JSRuntime *rt, JSValueConst v)
-@@ -681,7 +681,7 @@ static inline JSValue JS_DupValueRT(JSRuntime *rt, JSValueConst v)
+@@ -681,7 +695,7 @@ static inline JSValue JS_DupValueRT(JSRuntime *rt, JSValueConst v)
          JSRefCountHeader *p = (JSRefCountHeader *)JS_VALUE_GET_PTR(v);
          p->ref_count++;
      }
