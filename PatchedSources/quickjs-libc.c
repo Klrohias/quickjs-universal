@@ -28,20 +28,20 @@
 #include <inttypes.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/time.h>
 #include <time.h>
 #include <signal.h>
 #include <limits.h>
 #include <sys/stat.h>
+#include <dirent.h>
 #if defined(_WIN32)
 #include <windows.h>
 #include <conio.h>
-#include <sys/utime.h>
+#include <utime.h>
 #else
-#include <dirent.h>
-#include <sys/time.h>
-#include <unistd.h>
 #include <dlfcn.h>
 #include <termios.h>
 #include <sys/ioctl.h>
@@ -77,6 +77,10 @@ typedef sig_t sighandler_t;
 #include "cutils.h"
 #include "list.h"
 #include "quickjs-libc.h"
+
+#if !defined(PATH_MAX)
+#define PATH_MAX 4096
+#endif
 
 /* TODO:
    - add socket calls
@@ -1090,7 +1094,7 @@ static JSValue js_std_file_tell(JSContext *ctx, JSValueConst this_val,
     int64_t pos;
     if (!f)
         return JS_EXCEPTION;
-#if defined(__linux__)
+#if defined(__linux__) || defined(__GLIBC__)
     pos = ftello(f);
 #else
     pos = ftell(f);
@@ -1113,7 +1117,7 @@ static JSValue js_std_file_seek(JSContext *ctx, JSValueConst this_val,
         return JS_EXCEPTION;
     if (JS_ToInt32(ctx, &whence, argv[1]))
         return JS_EXCEPTION;
-#if defined(__linux__)
+#if defined(__linux__) || defined(__GLIBC__)
     ret = fseeko(f, pos, whence);
 #else
     ret = fseek(f, pos, whence);
@@ -3720,14 +3724,10 @@ static const JSCFunctionListEntry js_os_funcs[] = {
     JS_CFUNC_DEF("readdir", 1, js_os_readdir ),
     /* st_mode constants */
     OS_FLAG(S_IFMT),
-#ifdef S_IFIFO
     OS_FLAG(S_IFIFO),
-#endif
     OS_FLAG(S_IFCHR),
     OS_FLAG(S_IFDIR),
-#ifdef S_IFBLK
     OS_FLAG(S_IFBLK),
-#endif
     OS_FLAG(S_IFREG),
 #if !defined(_WIN32)
     OS_FLAG(S_IFSOCK),

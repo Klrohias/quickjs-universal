@@ -28,21 +28,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include "Polyfill.h"
 
-#if !defined(_MSC_VER)
 #define likely(x)       __builtin_expect(!!(x), 1)
 #define unlikely(x)     __builtin_expect(!!(x), 0)
 #define force_inline inline __attribute__((always_inline))
 #define no_inline __attribute__((noinline))
 #define __maybe_unused __attribute__((unused))
-#else
-#define likely(x)       (x)
-#define unlikely(x)     (x)
-#define force_inline inline __forceinline
-#define no_inline __declspec(noinline)
-#define __maybe_unused
-#endif
 
 #define xglue(x, y) x ## y
 #define glue(x, y) xglue(x, y)
@@ -158,23 +149,17 @@ static inline int ctz64(uint64_t a)
     return __builtin_ctzll(a);
 }
 
-__pragma( pack(push, 1) )
-struct packed_u64 {
+struct __attribute__((packed)) packed_u64 {
     uint64_t v;
 };
-__pragma( pack(pop))
 
-__pragma( pack(push, 1) )
-struct packed_u32 {
+struct __attribute__((packed)) packed_u32 {
     uint32_t v;
 };
-__pragma( pack(pop))
 
-__pragma( pack(push, 1) )
-struct packed_u16 {
+struct __attribute__((packed)) packed_u16 {
     uint16_t v;
 };
-__pragma( pack(pop))
 
 static inline uint64_t get_u64(const uint8_t *tab)
 {
