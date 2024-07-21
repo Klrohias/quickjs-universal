@@ -20,6 +20,8 @@ add_library(quickjs-universal
         PatchedSources/quickjs.c
         PatchedSources/quickjs.h)
 
+target_compile_definitions(quickjs-universal PRIVATE USE_BF_DEC)
+
 target_include_directories(quickjs-universal PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PatchedSources/>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
