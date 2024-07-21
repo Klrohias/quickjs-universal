@@ -1,5 +1,5 @@
 Write-Host "Coping sources..."
-Remove-Item -Recurse PatchedSources/
+Remove-Item -Recurse -Force PatchedSources/
 Copy-Item -Recurse OriginalSources/ PatchedSources/
 
 

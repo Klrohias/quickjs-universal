@@ -1,2 +1,2 @@
-Remove-Item -Recurse PatchedSources/
-Remove-Item -Recurse OriginalSources/
+Remove-Item -Recurse -Force PatchedSources/
+Remove-Item -Recurse -Force OriginalSources/
