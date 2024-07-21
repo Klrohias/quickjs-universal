@@ -52,10 +52,10 @@ index f079e5c..d212c64 100644
  static inline uint64_t get_u64(const uint8_t *tab)
  {
 diff --git a/OriginalSources/quickjs-libc.c b/PatchedSources/quickjs-libc.c
-index 8137150..ebcfe04 100644
+index 141f79f..7f2ae05 100644
 --- a/OriginalSources/quickjs-libc.c
 +++ b/PatchedSources/quickjs-libc.c
-@@ -28,20 +28,20 @@
+@@ -28,20 +28,21 @@
  #include <inttypes.h>
  #include <string.h>
  #include <assert.h>
@@ -73,6 +73,7 @@ index 8137150..ebcfe04 100644
  #include <conio.h>
 -#include <utime.h>
 +#include <sys/utime.h>
++#include <sys/stat.h>
  #else
 +#include <dirent.h>
 +#include <sys/time.h>
@@ -80,7 +81,7 @@ index 8137150..ebcfe04 100644
  #include <dlfcn.h>
  #include <termios.h>
  #include <sys/ioctl.h>
-@@ -3720,10 +3720,14 @@ static const JSCFunctionListEntry js_os_funcs[] = {
+@@ -3724,10 +3725,14 @@ static const JSCFunctionListEntry js_os_funcs[] = {
      JS_CFUNC_DEF("readdir", 1, js_os_readdir ),
      /* st_mode constants */
      OS_FLAG(S_IFMT),
@@ -96,7 +97,7 @@ index 8137150..ebcfe04 100644
  #if !defined(_WIN32)
      OS_FLAG(S_IFSOCK),
 diff --git a/OriginalSources/quickjs.c b/PatchedSources/quickjs.c
-index 3cb2643..b881166 100644
+index 642ae34..201d3ef 100644
 --- a/OriginalSources/quickjs.c
 +++ b/PatchedSources/quickjs.c
 @@ -28,10 +28,13 @@
@@ -238,7 +239,118 @@ index 3cb2643..b881166 100644
      }
  
      tag = JS_VALUE_GET_TAG(argv[0]);
-@@ -47225,7 +47228,7 @@ static JSMapRecord *map_add_record(JSContext *ctx, JSMapState *s,
+@@ -43314,39 +43317,75 @@ static JSValue js_math_random(JSContext *ctx, JSValueConst this_val,
+     return __JS_NewFloat64(ctx, u.d - 1.0);
+ }
+ 
++#define _PATCH_MK_MATH_STUB(NAME_) \
++double stub_math_##NAME_(double input) { \
++    return NAME_(input); \
++}
++
++_PATCH_MK_MATH_STUB(fabs)
++_PATCH_MK_MATH_STUB(floor)
++_PATCH_MK_MATH_STUB(ceil)
++_PATCH_MK_MATH_STUB(sqrt)
++
++_PATCH_MK_MATH_STUB(acos)
++_PATCH_MK_MATH_STUB(asin)
++_PATCH_MK_MATH_STUB(atan)
++_PATCH_MK_MATH_STUB(cos)
++_PATCH_MK_MATH_STUB(exp)
++_PATCH_MK_MATH_STUB(log)
++_PATCH_MK_MATH_STUB(sin)
++_PATCH_MK_MATH_STUB(tan)
++_PATCH_MK_MATH_STUB(trunc)
++_PATCH_MK_MATH_STUB(cosh)
++_PATCH_MK_MATH_STUB(sinh)
++_PATCH_MK_MATH_STUB(tanh)
++
++_PATCH_MK_MATH_STUB(acosh)
++_PATCH_MK_MATH_STUB(asinh)
++_PATCH_MK_MATH_STUB(atanh)
++_PATCH_MK_MATH_STUB(expm1)
++_PATCH_MK_MATH_STUB(log1p)
++_PATCH_MK_MATH_STUB(log2)
++_PATCH_MK_MATH_STUB(log10)
++_PATCH_MK_MATH_STUB(cbrt)
++
++double stub_math_atan2(double input1, double input2) {
++    return atan2(input1, input2);
++}
++
+ static const JSCFunctionListEntry js_math_funcs[] = {
+     JS_CFUNC_MAGIC_DEF("min", 2, js_math_min_max, 0 ),
+     JS_CFUNC_MAGIC_DEF("max", 2, js_math_min_max, 1 ),
+-    JS_CFUNC_SPECIAL_DEF("abs", 1, f_f, fabs ),
+-    JS_CFUNC_SPECIAL_DEF("floor", 1, f_f, floor ),
+-    JS_CFUNC_SPECIAL_DEF("ceil", 1, f_f, ceil ),
++    JS_CFUNC_SPECIAL_DEF("abs", 1, f_f, stub_math_fabs ),
++    JS_CFUNC_SPECIAL_DEF("floor", 1, f_f, stub_math_floor ),
++    JS_CFUNC_SPECIAL_DEF("ceil", 1, f_f, stub_math_ceil ),
+     JS_CFUNC_SPECIAL_DEF("round", 1, f_f, js_math_round ),
+-    JS_CFUNC_SPECIAL_DEF("sqrt", 1, f_f, sqrt ),
+-
+-    JS_CFUNC_SPECIAL_DEF("acos", 1, f_f, acos ),
+-    JS_CFUNC_SPECIAL_DEF("asin", 1, f_f, asin ),
+-    JS_CFUNC_SPECIAL_DEF("atan", 1, f_f, atan ),
+-    JS_CFUNC_SPECIAL_DEF("atan2", 2, f_f_f, atan2 ),
+-    JS_CFUNC_SPECIAL_DEF("cos", 1, f_f, cos ),
+-    JS_CFUNC_SPECIAL_DEF("exp", 1, f_f, exp ),
+-    JS_CFUNC_SPECIAL_DEF("log", 1, f_f, log ),
++    JS_CFUNC_SPECIAL_DEF("sqrt", 1, f_f, stub_math_sqrt ),
++
++    JS_CFUNC_SPECIAL_DEF("acos", 1, f_f, stub_math_acos ),
++    JS_CFUNC_SPECIAL_DEF("asin", 1, f_f, stub_math_asin ),
++    JS_CFUNC_SPECIAL_DEF("atan", 1, f_f, stub_math_atan ),
++    JS_CFUNC_SPECIAL_DEF("atan2", 2, f_f_f, stub_math_atan2 ),
++    JS_CFUNC_SPECIAL_DEF("cos", 1, f_f, stub_math_cos ),
++    JS_CFUNC_SPECIAL_DEF("exp", 1, f_f, stub_math_exp ),
++    JS_CFUNC_SPECIAL_DEF("log", 1, f_f, stub_math_log ),
+     JS_CFUNC_SPECIAL_DEF("pow", 2, f_f_f, js_pow ),
+-    JS_CFUNC_SPECIAL_DEF("sin", 1, f_f, sin ),
+-    JS_CFUNC_SPECIAL_DEF("tan", 1, f_f, tan ),
++    JS_CFUNC_SPECIAL_DEF("sin", 1, f_f, stub_math_sin ),
++    JS_CFUNC_SPECIAL_DEF("tan", 1, f_f, stub_math_tan ),
+     /* ES6 */
+-    JS_CFUNC_SPECIAL_DEF("trunc", 1, f_f, trunc ),
++    JS_CFUNC_SPECIAL_DEF("trunc", 1, f_f, stub_math_trunc ),
+     JS_CFUNC_SPECIAL_DEF("sign", 1, f_f, js_math_sign ),
+-    JS_CFUNC_SPECIAL_DEF("cosh", 1, f_f, cosh ),
+-    JS_CFUNC_SPECIAL_DEF("sinh", 1, f_f, sinh ),
+-    JS_CFUNC_SPECIAL_DEF("tanh", 1, f_f, tanh ),
+-    JS_CFUNC_SPECIAL_DEF("acosh", 1, f_f, acosh ),
+-    JS_CFUNC_SPECIAL_DEF("asinh", 1, f_f, asinh ),
+-    JS_CFUNC_SPECIAL_DEF("atanh", 1, f_f, atanh ),
+-    JS_CFUNC_SPECIAL_DEF("expm1", 1, f_f, expm1 ),
+-    JS_CFUNC_SPECIAL_DEF("log1p", 1, f_f, log1p ),
+-    JS_CFUNC_SPECIAL_DEF("log2", 1, f_f, log2 ),
+-    JS_CFUNC_SPECIAL_DEF("log10", 1, f_f, log10 ),
+-    JS_CFUNC_SPECIAL_DEF("cbrt", 1, f_f, cbrt ),
++    JS_CFUNC_SPECIAL_DEF("cosh", 1, f_f, stub_math_cosh ),
++    JS_CFUNC_SPECIAL_DEF("sinh", 1, f_f, stub_math_sinh ),
++    JS_CFUNC_SPECIAL_DEF("tanh", 1, f_f, stub_math_tanh ),
++    JS_CFUNC_SPECIAL_DEF("acosh", 1, f_f, stub_math_acosh ),
++    JS_CFUNC_SPECIAL_DEF("asinh", 1, f_f, stub_math_asinh ),
++    JS_CFUNC_SPECIAL_DEF("atanh", 1, f_f, stub_math_atanh ),
++    JS_CFUNC_SPECIAL_DEF("expm1", 1, f_f, stub_math_expm1 ),
++    JS_CFUNC_SPECIAL_DEF("log1p", 1, f_f, stub_math_log1p ),
++    JS_CFUNC_SPECIAL_DEF("log2", 1, f_f, stub_math_log2 ),
++    JS_CFUNC_SPECIAL_DEF("log10", 1, f_f, stub_math_log10 ),
++    JS_CFUNC_SPECIAL_DEF("cbrt", 1, f_f, stub_math_cbrt ),
+     JS_CFUNC_DEF("hypot", 2, js_math_hypot ),
+     JS_CFUNC_DEF("random", 0, js_math_random ),
+     JS_CFUNC_SPECIAL_DEF("fround", 1, f_f, js_math_fround ),
+@@ -43363,6 +43402,8 @@ static const JSCFunctionListEntry js_math_funcs[] = {
+     JS_PROP_DOUBLE_DEF("SQRT2", 1.4142135623730951, 0 ),
+ };
+ 
++#undef _PATCH_MK_MATH_STUB
++
+ static const JSCFunctionListEntry js_math_obj[] = {
+     JS_OBJECT_DEF("Math", js_math_funcs, countof(js_math_funcs), JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE ),
+ };
+@@ -47225,7 +47266,7 @@ static JSMapRecord *map_add_record(JSContext *ctx, JSMapState *s,
      } else {
          JS_DupValue(ctx, key);
      }
@@ -247,7 +359,7 @@ index 3cb2643..b881166 100644
      h = map_hash_key(ctx, key) & (s->hash_size - 1);
      list_add_tail(&mr->hash_link, &s->hash_table[h]);
      list_add_tail(&mr->link, &s->records);
-@@ -47447,7 +47450,7 @@ static JSValue js_map_forEach(JSContext *ctx, JSValueConst this_val,
+@@ -47447,7 +47488,7 @@ static JSValue js_map_forEach(JSContext *ctx, JSValueConst this_val,
                  args[0] = args[1];
              else
                  args[0] = JS_DupValue(ctx, mr->value);
@@ -256,7 +368,7 @@ index 3cb2643..b881166 100644
              ret = JS_Call(ctx, func, this_arg, 3, (JSValueConst *)args);
              JS_FreeValue(ctx, args[0]);
              if (!magic)
-@@ -48549,7 +48552,7 @@ static JSValue js_promise_all(JSContext *ctx, JSValueConst this_val,
+@@ -48549,7 +48590,7 @@ static JSValue js_promise_all(JSContext *ctx, JSValueConst this_val,
                  goto fail_reject;
              }
              resolve_element_data[0] = JS_NewBool(ctx, FALSE);
@@ -265,7 +377,7 @@ index 3cb2643..b881166 100644
              resolve_element_data[2] = values;
              resolve_element_data[3] = resolving_funcs[is_promise_any];
              resolve_element_data[4] = resolve_element_env;
-@@ -48908,7 +48911,7 @@ static JSValue js_async_from_sync_iterator_unwrap_func_create(JSContext *ctx,
+@@ -48908,7 +48949,7 @@ static JSValue js_async_from_sync_iterator_unwrap_func_create(JSContext *ctx,
  {
      JSValueConst func_data[1];
  
@@ -274,7 +386,7 @@ index 3cb2643..b881166 100644
      return JS_NewCFunctionData(ctx, js_async_from_sync_iterator_unwrap,
                                 1, 0, 1, func_data);
  }
-@@ -54678,8 +54681,8 @@ static int js_TA_cmp_generic(const void *a, const void *b, void *opaque) {
+@@ -54678,8 +54719,8 @@ static int js_TA_cmp_generic(const void *a, const void *b, void *opaque) {
              psc->exception = 2;
          }
      done:

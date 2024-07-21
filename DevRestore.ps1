@@ -3,3 +3,4 @@ Remove-Item -Recurse -Force OriginalSources/
 
 Copy-Item -Recurse DevSources/ OriginalSources
 Copy-Item -Recurse DevPatches/ PatchedSources
+Copy-Item Patches/Polyfill.h PatchedSources
