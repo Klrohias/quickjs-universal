@@ -1,2 +1,2 @@
-rm -Recurse PatchedSources/
-rm -Recurse OriginalSources/
+Remove-Item -Recurse PatchedSources/
+Remove-Item -Recurse OriginalSources/

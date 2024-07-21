@@ -1,5 +1,5 @@
-rm -Recurse PatchedSources/
-rm -Recurse OriginalSources/
+Remove-Item -Recurse PatchedSources/
+Remove-Item -Recurse OriginalSources/
 
-cp -Recurse DevSources/ OriginalSources
-cp -Recurse DevPatches/ PatchedSources
+Copy-Item -Recurse DevSources/ OriginalSources
+Copy-Item -Recurse DevPatches/ PatchedSources

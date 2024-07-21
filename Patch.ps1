@@ -1,9 +1,9 @@
 Write-Host "Coping sources..."
-rm -Recurse PatchedSources/
-rm -Recurse OriginalSources/
+Remove-Item -Recurse PatchedSources/
+Remove-Item -Recurse OriginalSources/
 git clone https://github.com/bellard/quickjs OriginalSources
-cp -Recurse OriginalSources/ PatchedSources/
+Copy-Item -Recurse OriginalSources/ PatchedSources/
 
 Write-Host "Patching sources..."
-cp Patches/Polyfill.h PatchedSources/
+Copy-Item Patches/Polyfill.h PatchedSources/
 git apply --reject --whitespace=fix Patches/quickjs-patches.patch

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  greet:
+  create-patch:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
