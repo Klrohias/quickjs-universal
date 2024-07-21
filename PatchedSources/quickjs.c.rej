@@ -1,0 +1,16 @@
+diff a/PatchedSources/quickjs.c b/PatchedSources/quickjs.c	(rejected hunks)
+@@ -28,10 +28,13 @@
+ #include <inttypes.h>
+ #include <string.h>
+ #include <assert.h>
+-#include <sys/time.h>
+ #include <time.h>
+ #include <fenv.h>
+ #include <math.h>
++#if defined(_WIN32)
++#else
++#include <sys/time.h>
++#endif
+ #if defined(__APPLE__)
+ #include <malloc/malloc.h>
+ #elif defined(__linux__)

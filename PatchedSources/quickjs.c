@@ -28,16 +28,13 @@
 #include <inttypes.h>
 #include <string.h>
 #include <assert.h>
+#include <sys/time.h>
 #include <time.h>
 #include <fenv.h>
 #include <math.h>
-#if defined(_WIN32)
-#else
-#include <sys/time.h>
-#endif
 #if defined(__APPLE__)
 #include <malloc/malloc.h>
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__GLIBC__)
 #include <malloc.h>
 #elif defined(__FreeBSD__)
 #include <malloc_np.h>
@@ -1711,7 +1708,7 @@ static size_t js_def_malloc_usable_size(const void *ptr)
     return _msize((void *)ptr);
 #elif defined(EMSCRIPTEN)
     return 0;
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__GLIBC__)
     return malloc_usable_size((void *)ptr);
 #else
     /* change this to `return 0;` if compilation fails */
