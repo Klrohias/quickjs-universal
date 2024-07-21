@@ -1,0 +1,6 @@
+DevPatches/
+DevSources/
+OriginalSources/
+build/
+build-*/
+cmake-*/
