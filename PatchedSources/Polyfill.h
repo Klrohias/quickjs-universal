@@ -54,6 +54,14 @@ int __inline isatty(int fd) {
     return _isatty(fd);
 }
 
+// from https://www.davekb.com/browse_programming_tips:windows_isreg_isdir:txt
+#ifndef _S_ISTYPE
+#define _S_ISTYPE(mode, mask)  (((mode) & _S_IFMT) == (mask))
+#define S_ISREG(mode) _S_ISTYPE((mode), _S_IFREG)
+#define S_ISDIR(mode) _S_ISTYPE((mode), _S_IFDIR)
+#endif
+
+
 // from https://github.com/binzume/quickjs-msvc/blob/master/quickjs-libc.c
 
 struct dirent {
